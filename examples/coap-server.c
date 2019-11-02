@@ -599,7 +599,20 @@ hnd_unknown_put(coap_context_t *ctx,
 
   return;
 }
+hnd_hellow_world(coap_context_t *ctx UNUSED_PARAM,
+              struct coap_resource_t *resource,
+              coap_session_t *session,
+              coap_pdu_t *request,
+              coap_binary_t *token,
+              coap_string_t *query UNUSED_PARAM,
+              coap_pdu_t *response) {
+  char sss[]= "111111111 liuuyingjie\n";
+  coap_add_data_blocked_response(resource, session, request, response, token,
+                                 COAP_MEDIATYPE_TEXT_PLAIN, 0x2ffff,
+                                 strlen(sss),
+                                 sss);
 
+}
 static void
 init_resources(coap_context_t *ctx) {
   coap_resource_t *r;
@@ -627,6 +640,16 @@ init_resources(coap_context_t *ctx) {
 
   coap_add_resource(ctx, r);
   time_resource = r;
+
+  r = coap_resource_init(coap_make_str_const("hello"), resource_flags);
+
+  coap_register_handler(r, COAP_REQUEST_GET, hnd_hellow_world);
+  coap_resource_set_get_observable(r, 1);
+
+  coap_add_attr(r, coap_make_str_const("if"), coap_make_str_const("\"clock\""), 0);
+
+  coap_add_resource(ctx, r);
+
 
   if (support_dynamic > 0) {
     /* Create a resource to handle PUTs to unknown URIs */
@@ -901,7 +924,7 @@ main(int argc, char **argv) {
 #endif
 
   clock_offset = time(NULL);
-
+  printf("server input params num : %d \n",argc);
   while ((opt = getopt(argc, argv, "A:d:c:C:g:h:k:l:nNp:R:v:")) != -1) {
     switch (opt) {
     case 'A' :
